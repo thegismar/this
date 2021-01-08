@@ -1,4 +1,4 @@
-from this import Etherscan
+from w3helpers import Etherscan
 
 
 def test_get_birth_block():
