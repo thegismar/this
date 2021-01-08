@@ -50,7 +50,7 @@ class Etherscan:
         response = self._query(module, params)
         return int(response[0]['blockNumber'])
 
-    def get_event(self, contract, event, loc):
+    def get_events(self, contract, event):
         module = 'logs'
         params = DotMap()
         first_block = self.get_birth_block(contract)
@@ -59,8 +59,7 @@ class Etherscan:
         params.toBlock = 'latest'
         params.address = contract
         params.topic0 = event
-        response = self._query(module, params)
-        return Web3.toInt(hexstr=response[loc]['timeStamp'])
+        return self._query(module, params)
 
     def get_block_countdown(self, block):
         module = 'block'
