@@ -4,6 +4,7 @@ from environs import Env
 import requests
 from datetime import datetime
 from web3 import Web3
+import time
 
 
 class Etherscan:
