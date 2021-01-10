@@ -1,9 +1,11 @@
 from dotmap import DotMap
 import pandas as pd
 from environs import Env
+from tqdm import trange
 import requests
 from datetime import datetime
 from web3 import Web3
+import matplotlib.pyplot as plt
 import time
 
 
@@ -77,7 +79,10 @@ class Uniswap:
     def __init__(self):
         self.w3 = Web3(Web3.HTTPProvider(self.env('WEB3_HTTP_URI')))
 
-    def get_pair_prices(self, pair, block=None):
+    def get_pair_prices(self, pair, block=None, step=None):
+
+        pair = Web3.toChecksumAddress(pair)
+
         with open('UniPair.json', 'r') as f:
             abi = f.read()
         pair_contract = self.w3.eth.contract(abi=abi, address=pair)
@@ -100,9 +105,12 @@ class Uniswap:
             prices_list = []
             max_block = self.w3.eth.blockNumber
             min_block = max_block - block
-            for i in range(min_block, max_block, 10):
+            for i in trange(min_block, max_block, step):
+                if i > max_block:
+                    break
+
                 b = min(i, max_block)
-                reserves = pair_contract.functions.getReserves(block_identifier=b)
+                reserves = pair_contract.functions.getReserves().call(block_identifier=b)
                 reserve0 = int(reserves[0]) / 10 ** token0_decimals
                 reserve1 = int(reserves[1]) / 10 ** token1_decimals
                 date = datetime.utcfromtimestamp(float(reserves[2]))
@@ -111,6 +119,11 @@ class Uniswap:
 
             df = pd.DataFrame(prices_list)
             return df
+
+    def plot_prices(self, pair, block, step):
+        df = self.get_pair_prices(pair, block, step)
+        df.plot(x='date', y='price')
+        plt.show()
 
 
 class Token:

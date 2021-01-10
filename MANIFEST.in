@@ -1,1 +1,2 @@
 include w3helpers/*.json
+include tests/*.json
